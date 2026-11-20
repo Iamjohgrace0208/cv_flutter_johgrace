@@ -8,7 +8,7 @@ class ProfileData {
   static const fullName = 'Sadiki Selemani Joseph Grâce';
   static const role = 'INFORMATICIEN | PASTEUR';
   static const nationality = 'Congolaise';
-  static const birth = 'Né le 2 août 2000 à Kinshasa';
+  static const birthday = '2 août';
   static const location = 'Goma, RDC';
   static const email = 'selemanijoseph575@gmail.com';
   static const phone = '+243 980 041 610';

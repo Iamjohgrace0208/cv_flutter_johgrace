@@ -311,7 +311,7 @@ class _PersonalDetails extends StatelessWidget {
             _DetailRow(
               icon: Icons.cake_outlined,
               label: 'Naissance',
-              value: ProfileData.birth,
+              value: ProfileData.birthday,
             ),
             const Divider(height: 22),
             _DetailRow(
