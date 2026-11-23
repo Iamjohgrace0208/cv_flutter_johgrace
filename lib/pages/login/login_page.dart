@@ -1,13 +1,15 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/api_service.dart';
 import '../../data/profile_data.dart';
 import '../../widgets/photo_gallery.dart';
 import '../shell/app_shell.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({required this.onToggleTheme, super.key});
+  const LoginPage({required this.onToggleTheme, this.apiService, super.key});
 
   final VoidCallback onToggleTheme;
+  final ApiService? apiService;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -15,34 +17,72 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  late final ApiService _api = widget.apiService ?? ApiService();
   bool _obscurePassword = true;
+  bool _isRegistering = false;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _signIn() {
+  Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Mode de démonstration : aucune authentification réelle.',
-        ),
-      ),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => AppShell(onToggleTheme: widget.onToggleTheme),
-      ),
-    );
+    setState(() => _isSubmitting = true);
+    try {
+      if (_isRegistering) {
+        await _api.register(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+        if (!mounted) return;
+        setState(() => _isRegistering = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Compte créé. Connectez-vous pour continuer.'),
+          ),
+        );
+      } else {
+        await _api.login(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+        if (!mounted) return;
+        final navigator = Navigator.of(context);
+        navigator.pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => AppShell(
+              apiService: _api,
+              onToggleTheme: widget.onToggleTheme,
+              onLogout: () {
+                navigator.pushReplacement(
+                  MaterialPageRoute<void>(
+                    builder: (_) => LoginPage(
+                      onToggleTheme: widget.onToggleTheme,
+                      apiService: _api,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      }
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message)));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -68,9 +108,13 @@ class _LoginPageState extends State<LoginPage> {
                           color: Theme.of(context).colorScheme.primary,
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Icon(
-                          Icons.nature_people_outlined,
-                          color: scheme.onPrimary,
+                        child: Text(
+                          'J',
+                          style: TextStyle(
+                            color: scheme.onPrimary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 11),
@@ -105,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                         PhotoThumbnail(
                           personName: ProfileData.fullName,
                           photos: ProfileData.family.last.photos,
-                          index: 0,
+                          index: 1,
                           width: 178,
                           height: 205,
                           borderRadius: BorderRadius.all(Radius.circular(28)),
@@ -149,23 +193,30 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         TextFormField(
-                          controller: _usernameController,
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
-                            labelText: 'Identifiant',
-                            hintText: 'Votre identifiant',
-                            prefixIcon: Icon(Icons.person_outline_rounded),
+                            labelText: 'Adresse e-mail',
+                            hintText: 'nom@exemple.com',
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
-                          validator: (value) =>
-                              value == null || value.trim().isEmpty
-                              ? 'Veuillez saisir votre identifiant.'
-                              : null,
+                          validator: (value) {
+                            final email = value?.trim() ?? '';
+                            if (email.isEmpty ||
+                                email.length > 100 ||
+                                !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                    .hasMatch(email)) {
+                              return 'Saisissez une adresse e-mail valide.';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 14),
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          onFieldSubmitted: (_) => _signIn(),
+                          onFieldSubmitted: (_) => _submit(),
                           decoration: InputDecoration(
                             labelText: 'Mot de passe',
                             hintText: 'Votre mot de passe',
@@ -186,9 +237,15 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Veuillez saisir votre mot de passe.'
-                              : null,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez saisir votre mot de passe.';
+                            }
+                            if (_isRegistering && value.length < 6) {
+                              return 'Le mot de passe doit contenir au moins 6 caractères.';
+                            }
+                            return null;
+                          },
                         ),
                       ],
                     ),
@@ -198,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 56,
                     child: FilledButton(
-                      onPressed: _signIn,
+                      onPressed: _isSubmitting ? null : _submit,
                       style: FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Theme.of(context)
@@ -208,16 +265,40 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Se connecter',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          SizedBox(width: 9),
-                          Icon(Icons.arrow_forward_rounded, size: 19),
-                        ],
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _isRegistering
+                                      ? 'Créer mon compte'
+                                      : 'Se connecter',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(width: 9),
+                                Icon(Icons.arrow_forward_rounded, size: 19),
+                              ],
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: TextButton(
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => setState(() {
+                              _isRegistering = !_isRegistering;
+                              _formKey.currentState?.reset();
+                            }),
+                      child: Text(
+                        _isRegistering
+                            ? 'J’ai déjà un compte · Se connecter'
+                            : 'Pas encore de compte ? Créer un compte',
                       ),
                     ),
                   ),
@@ -232,7 +313,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 8),
                   Center(
                     child: Text(
-                      'Accès de démonstration : aucun compte requis.',
+                      'Identifiants vérifiés par l’API.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.primary,

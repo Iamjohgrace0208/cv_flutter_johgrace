@@ -31,12 +31,11 @@ class ProfileData {
 
   static const education = <Education>[
     Education(
-      title: 'Licence en Systèmes Informatiques',
-      institution: 'ISIG-Goma',
+      title: 'Licence en Sciences informatiques',
+      institution:
+          'Institut Supérieur d’Informatique et de Gestion de Goma (ISIG-GOMA)',
       period: 'Novembre 2023 – aujourd’hui',
-      detail:
-          'Option Réseaux et Télécommunications · Formation en cours · '
-          'Fin prévue : juillet 2027',
+      detail: 'Option Réseaux et Télécommunications · Formation en cours',
       isCurrent: true,
     ),
     Education(

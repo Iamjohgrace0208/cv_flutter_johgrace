@@ -13,110 +13,118 @@ class ContactPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
-        children: [
-          const SectionHeading(
-            eyebrow: 'Restons en contact',
-            title: 'Me joindre',
-          ),
-          const SizedBox(height: 11),
-          Text(
-            'Pour une collaboration, une question ou simplement échanger, '
-            'retrouvez-moi ici.',
-            style: Theme.of(context).textTheme.bodyLarge
-                ?.copyWith(color: scheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 22),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: scheme.primary,
-              borderRadius: BorderRadius.circular(23),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.mark_email_unread_outlined,
-                  color: scheme.onPrimary,
-                  size: 25,
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  'Une conversation peut\ntout commencer.',
-                  style: TextStyle(
-                    color: scheme.onPrimary,
-                    fontSize: 23,
-                    height: 1.12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 9),
-                Text(
-                  'Basé à Goma, République démocratique du Congo.',
-                  style: TextStyle(
-                    color: scheme.onPrimary.withValues(alpha: 0.85),
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _PrimaryContactButton(
-                  label: 'M’écrire par e-mail',
-                  icon: Icons.mail_outline_rounded,
-                  onPressed: () => _openLink(context, ProfileData.emailUri),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          const SectionHeading(eyebrow: 'Coordonnées', title: 'Contact direct'),
-          const SizedBox(height: 13),
-          _ContactTile(
-            icon: Icons.phone_outlined,
-            label: 'TÉLÉPHONE',
-            value: ProfileData.phone,
-            onTap: () => _openLink(context, ProfileData.phoneUri),
-            onCopy: () => _copyToClipboard(context, ProfileData.phone),
-          ),
-          const SizedBox(height: 9),
-          _ContactTile(
-            icon: Icons.mail_outline_rounded,
-            label: 'E-MAIL',
-            value: ProfileData.email,
-            onTap: () => _openLink(context, ProfileData.emailUri),
-            onCopy: () => _copyToClipboard(context, ProfileData.email),
-          ),
-          const SizedBox(height: 9),
-          const _ContactTile(
-            icon: Icons.location_on_outlined,
-            label: 'RÉSIDENCE',
-            value: ProfileData.location,
-          ),
-          const SizedBox(height: 25),
-          const SectionHeading(
-            eyebrow: 'Retrouvez-moi en ligne',
-            title: 'Réseaux sociaux',
-          ),
-          const SizedBox(height: 13),
-          ...ProfileData.socialLinks.map(
-            (link) => Padding(
-              padding: const EdgeInsets.only(bottom: 9),
-              child: _SocialTile(
-                link: link,
-                onTap: () => _openLink(context, link.uri),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
+            children: [
+              const SectionHeading(
+                eyebrow: 'Restons en contact',
+                title: 'Me joindre',
               ),
-            ),
+              const SizedBox(height: 11),
+              Text(
+                'Pour une collaboration, une question ou simplement échanger, '
+                'retrouvez-moi ici.',
+                style: Theme.of(context).textTheme.bodyLarge
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 22),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: scheme.primary,
+                  borderRadius: BorderRadius.circular(23),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.mark_email_unread_outlined,
+                      color: scheme.onPrimary,
+                      size: 25,
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      'Une conversation peut\ntout commencer.',
+                      style: TextStyle(
+                        color: scheme.onPrimary,
+                        fontSize: 23,
+                        height: 1.12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      'Basé à Goma, République démocratique du Congo.',
+                      style: TextStyle(
+                        color: scheme.onPrimary.withValues(alpha: 0.85),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _PrimaryContactButton(
+                      label: 'M’écrire par e-mail',
+                      icon: Icons.mail_outline_rounded,
+                      onPressed: () => _openLink(context, ProfileData.emailUri),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const SectionHeading(
+                eyebrow: 'Coordonnées',
+                title: 'Contact direct',
+              ),
+              const SizedBox(height: 13),
+              _ContactTile(
+                icon: Icons.phone_outlined,
+                label: 'TÉLÉPHONE',
+                value: ProfileData.phone,
+                onTap: () => _openLink(context, ProfileData.phoneUri),
+                onCopy: () => _copyToClipboard(context, ProfileData.phone),
+              ),
+              const SizedBox(height: 9),
+              _ContactTile(
+                icon: Icons.mail_outline_rounded,
+                label: 'E-MAIL',
+                value: ProfileData.email,
+                onTap: () => _openLink(context, ProfileData.emailUri),
+                onCopy: () => _copyToClipboard(context, ProfileData.email),
+              ),
+              const SizedBox(height: 9),
+              const _ContactTile(
+                icon: Icons.location_on_outlined,
+                label: 'RÉSIDENCE',
+                value: ProfileData.location,
+              ),
+              const SizedBox(height: 25),
+              const SectionHeading(
+                eyebrow: 'Retrouvez-moi en ligne',
+                title: 'Réseaux sociaux',
+              ),
+              const SizedBox(height: 13),
+              ...ProfileData.socialLinks.map(
+                (link) => Padding(
+                  padding: const EdgeInsets.only(bottom: 9),
+                  child: _SocialTile(
+                    link: link,
+                    onTap: () => _openLink(context, link.uri),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Les liens s’ouvrent dans l’application associée si elle est '
+                'installée, sinon dans le navigateur.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(fontSize: 11),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Les liens s’ouvrent dans l’application associée si elle est '
-            'installée, sinon dans le navigateur.',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(fontSize: 11),
-          ),
-        ],
+        ),
       ),
     );
   }

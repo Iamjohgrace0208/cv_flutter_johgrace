@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'data/api_service.dart';
 import 'core/app_theme.dart';
 import 'pages/login/login_page.dart';
 
@@ -8,14 +9,16 @@ void main() {
 }
 
 class CvFlutterApp extends StatefulWidget {
-  const CvFlutterApp({super.key});
+  const CvFlutterApp({this.apiService, super.key});
+
+  final ApiService? apiService;
 
   @override
   State<CvFlutterApp> createState() => _CvFlutterAppState();
 }
 
 class _CvFlutterAppState extends State<CvFlutterApp> {
-  ThemeMode _themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.dark;
 
   void _toggleTheme() {
     setState(() {
@@ -35,7 +38,10 @@ class _CvFlutterAppState extends State<CvFlutterApp> {
       themeMode: _themeMode,
       themeAnimationDuration: const Duration(milliseconds: 280),
       themeAnimationCurve: Curves.easeInOut,
-      home: LoginPage(onToggleTheme: _toggleTheme),
+      home: LoginPage(
+        apiService: widget.apiService,
+        onToggleTheme: _toggleTheme,
+      ),
     );
   }
 }
