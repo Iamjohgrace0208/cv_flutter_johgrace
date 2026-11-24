@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/profile_data.dart';
 import '../../widgets/photo_gallery.dart';
@@ -415,44 +416,82 @@ class _HeroIntroduction extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 22),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_outlined,
-                color: _PortfolioColors.gold,
-                size: 17,
-              ),
-              const SizedBox(width: 5),
-              const Text(
-                'GOMA, RDC',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.6,
-                ),
-              ),
-              const SizedBox(width: 20),
-              TextButton.icon(
-                onPressed: onExplore,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.zero,
-                ),
-                icon: const Icon(Icons.south_rounded, size: 16),
-                label: const Text(
-                  'DÉCOUVRIR MON PARCOURS',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+          if (screenWidth < 430)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HeroLocation(),
+                TextButton.icon(
+                  onPressed: onExplore,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.zero,
+                  ),
+                  icon: const Icon(Icons.south_rounded, size: 16),
+                  label: const Text(
+                    'DÉCOUVRIR MON PARCOURS',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                _HeroLocation(),
+                const SizedBox(width: 20),
+                TextButton.icon(
+                  onPressed: onExplore,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.zero,
+                  ),
+                  icon: const Icon(Icons.south_rounded, size: 16),
+                  label: const Text(
+                    'DÉCOUVRIR MON PARCOURS',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _HeroLocation extends StatelessWidget {
+  const _HeroLocation();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.location_on_outlined,
+          color: _PortfolioColors.gold,
+          size: 17,
+        ),
+        SizedBox(width: 5),
+        Text(
+          'GOMA, RDC',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.6,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -757,56 +796,62 @@ class _ExperienceEntry extends StatelessWidget {
         dividerColor: Colors.transparent,
         splashColor: Colors.white.withValues(alpha: 0.04),
       ),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 13),
-        iconColor: _PortfolioColors.gold,
-        collapsedIconColor: _PortfolioColors.muted,
-        title: Text(
-          experience.role,
-          style: const TextStyle(
-            color: _PortfolioColors.paper,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+      child: Material(
+        color: Colors.transparent,
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 13),
+          iconColor: _PortfolioColors.gold,
+          collapsedIconColor: _PortfolioColors.muted,
+          title: Text(
+            experience.role,
+            style: const TextStyle(
+              color: _PortfolioColors.paper,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Text(
-            '${experience.organization} · ${experience.period}',
-            style: const TextStyle(color: _PortfolioColors.muted, fontSize: 11),
-          ),
-        ),
-        children: [
-          for (final responsibility in experience.responsibilities)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 7),
-                    child: Icon(
-                      Icons.circle,
-                      color: _PortfolioColors.gold,
-                      size: 5,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      responsibility,
-                      style: const TextStyle(
-                        color: _PortfolioColors.muted,
-                        fontSize: 12,
-                        height: 1.6,
-                      ),
-                    ),
-                  ),
-                ],
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              '${experience.organization} · ${experience.period}',
+              style: const TextStyle(
+                color: _PortfolioColors.muted,
+                fontSize: 11,
               ),
             ),
-        ],
+          ),
+          children: [
+            for (final responsibility in experience.responsibilities)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 7),
+                      child: Icon(
+                        Icons.circle,
+                        color: _PortfolioColors.gold,
+                        size: 5,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        responsibility,
+                        style: const TextStyle(
+                          color: _PortfolioColors.muted,
+                          fontSize: 12,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -1163,28 +1208,61 @@ class _MinistrySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wide = MediaQuery.sizeOf(context).width >= 760;
-    final stories = [
-      (
-        'assets/images/johgrace/f9b95cb8_5b90_41d1_ba7a_064f554114ff.png',
-        'PRÉDICATION',
+    final sermons = [
+      const _Sermon(
+        title: "L'URGENCE DE LA PRIÈRE - JOSEPH SELEMANI",
+        uri: 'https://www.youtube.com/live/CScTKURhc7Y',
+        imagePath: 'assets/images/johgrace/img_2093.jpg',
       ),
-      (
-        'assets/images/johgrace/56bb2e81_be93_456e_939d_f16dbb6a8ed2.jpg',
-        'ENSEIGNEMENT',
+      const _Sermon(
+        title: 'DIEU EST LÀ, MAIS…',
+        uri: 'https://youtu.be/zAP6QBlmLeA',
+        imagePath:
+            'assets/images/johgrace/f9b95cb8_5b90_41d1_ba7a_064f554114ff.png',
       ),
-      ('assets/images/johgrace/img_5793.jpg', 'SERVICE'),
+      const _Sermon(
+        title: 'SANCTIFIÉS POUR PARAÎTRE…',
+        uri: 'https://youtu.be/VpR7lcw8GfU',
+        imagePath:
+            'assets/images/johgrace/56bb2e81_be93_456e_939d_f16dbb6a8ed2.jpg',
+      ),
+      const _Sermon(
+        title: 'MON JÉRUSALEM…',
+        uri: 'https://youtu.be/3qgZwjW0w2s',
+        imagePath: 'assets/images/johgrace/img_5793.jpg',
+      ),
+      const _Sermon(
+        title: 'TON MIRACLE EST EXIGEANT',
+        uri: 'https://youtu.be/pPDsHLSUZgw',
+        imagePath:
+            'assets/images/johgrace/40c8cb9f_bea5_4e1b_8d5d_09786683ad2a.jpg',
+      ),
+      const _Sermon(
+        title: "LA VICTOIRE PAR LES ARMES DE DIEU : L'ARME APPROPRIÉE",
+        uri: 'https://youtu.be/UFm6A2YC1NE',
+        imagePath: 'assets/images/johgrace/dsc01595_original.jpg',
+      ),
+      const _Sermon(
+        title: "L'HEURE VIENT",
+        uri: 'https://youtu.be/EIIW6ykXr6I',
+        imagePath: 'assets/images/johgrace/photo_output.jpg',
+      ),
+      const _Sermon(
+        title: 'QUAND TOUT BOUGE, ACCROCHE-TOI À CE QUE DIEU A DIT',
+        uri: 'https://youtube.com/shorts/nGFdOCIsiMU',
+        imagePath:
+            'assets/images/johgrace/9bc58013_3c20_458e_8943_d6aef860a9b3.jpg',
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _EditorialLead(
-          'La foi, la parole et le service font partie de mon engagement.',
+          'La foi, la parole et les enseignements qui façonnent mon engagement.',
         ),
         const SizedBox(height: 12),
         const Text(
-          'Je m’investis dans le ministère chrétien à travers la prédication, '
-          'l’enseignement et le partage de la foi.',
+          'Une sélection de prédications accessibles directement sur YouTube.',
           style: TextStyle(
             color: _PortfolioColors.muted,
             fontSize: 14,
@@ -1194,26 +1272,160 @@ class _MinistrySection extends StatelessWidget {
         const SizedBox(height: 24),
         LayoutBuilder(
           builder: (context, constraints) {
-            final columns = wide ? 3 : 1;
+            final columns = constraints.maxWidth >= 980
+                ? 3
+                : constraints.maxWidth >= 620
+                ? 2
+                : 1;
             final width = (constraints.maxWidth - 14 * (columns - 1)) / columns;
             return Wrap(
               spacing: 14,
               runSpacing: 14,
               children: [
-                for (final story in stories)
+                for (final sermon in sermons)
                   SizedBox(
                     width: width,
-                    child: _StoryPhoto(
-                      imagePath: story.$1,
-                      title: story.$2,
-                      height: wide ? 320 : 275,
-                    ),
+                    child: _SermonCard(sermon: sermon),
                   ),
               ],
             );
           },
         ),
       ],
+    );
+  }
+}
+
+class _Sermon {
+  const _Sermon({
+    required this.title,
+    required this.uri,
+    required this.imagePath,
+  });
+
+  final String title;
+  final String uri;
+  final String imagePath;
+}
+
+class _SermonCard extends StatefulWidget {
+  const _SermonCard({required this.sermon});
+
+  final _Sermon sermon;
+
+  @override
+  State<_SermonCard> createState() => _SermonCardState();
+}
+
+class _SermonCardState extends State<_SermonCard> {
+  bool _hovered = false;
+
+  Future<void> _openSermon(BuildContext context) async {
+    final uri = Uri.parse(widget.sermon.uri);
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Impossible d’ouvrir cette prédication sur YouTube.'),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.sizeOf(context).width < 620 ? 300.0 : 340.0;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: _hovered ? 1.025 : 1,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        child: Tooltip(
+          message: 'Ouvrir sur YouTube',
+          child: Material(
+            color: const Color(0xFF141414),
+            child: InkWell(
+              onTap: () => _openSermon(context),
+              child: SizedBox(
+                height: height,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        widget.sermon.imagePath,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x4D000000),
+                              Color(0xB3000000),
+                              Color(0xF2000000),
+                            ],
+                            stops: [0, 0.48, 1],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 18,
+                        right: 18,
+                        bottom: 18,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.play_circle_fill_rounded,
+                                  color: _PortfolioColors.gold,
+                                  size: 21,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'PRÉDICATION · YOUTUBE',
+                                  style: TextStyle(
+                                    color: _PortfolioColors.gold,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              widget.sermon.title,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                height: 1.2,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

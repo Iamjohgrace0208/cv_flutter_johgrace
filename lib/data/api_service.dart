@@ -46,13 +46,6 @@ class ApiService {
     return _postJson('accounts/login', {'email': email, 'password': password});
   }
 
-  Future<Map<String, dynamic>> register(String email, String password) {
-    return _postJson('accounts/register', {
-      'email': email,
-      'password': password,
-    });
-  }
-
   Future<List<FamilyMember>> getFamilyMembers() async {
     final data = await _request('GET', 'famille-membres');
     if (data is! List) {

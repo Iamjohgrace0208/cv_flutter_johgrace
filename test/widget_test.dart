@@ -45,12 +45,6 @@ void main() {
           'data': {'id': 1, 'email': 'demo@example.com'},
         });
       }
-      if (request.url.path.endsWith('/accounts/register')) {
-        return _response(201, {
-          'success': true,
-          'data': {'id': 1, 'email': 'demo@example.com'},
-        });
-      }
       if (request.url.path.endsWith('/famille-membres')) {
         if (request.method == 'GET') {
           return _response(200, {'success': true, 'data': members});
@@ -94,6 +88,7 @@ void main() {
 
     await tester.pumpWidget(CvFlutterApp(apiService: apiService));
     expect(find.text('Se connecter'), findsOneWidget);
+    expect(find.textContaining('Créer un compte'), findsNothing);
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(
       tester
@@ -116,21 +111,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Saisissez une adresse e-mail valide.'), findsOneWidget);
 
-    await tester.tap(find.text('Pas encore de compte ? Créer un compte'));
-    await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byType(TextFormField).first,
-      'demo@example.com',
-    );
-    await tester.enterText(find.byType(TextFormField).last, 'secret123');
-    await tester.tap(find.text('Créer mon compte'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Compte créé. Connectez-vous pour continuer.'),
-      findsOneWidget,
-    );
-    expect(calls, contains('POST /api-test/public/accounts/register'));
-
     await tester.enterText(
       find.byType(TextFormField).first,
       'demo@example.com',
@@ -147,7 +127,7 @@ void main() {
     await tester.ensureVisible(find.text('Se connecter'));
     await tester.tap(find.text('Se connecter'));
     await tester.pumpAndSettle();
-    expect(find.text('PORTFOLIO PERSONNEL'), findsOneWidget);
+    expect(find.textContaining('PORTFOLIO PERSONNEL'), findsOneWidget);
     expect(find.text('Sadiki Selemani Joseph Grâce'), findsOneWidget);
 
     await tester.tap(find.text('Ma famille').last);
@@ -156,6 +136,7 @@ void main() {
     expect(find.text('Matakio Annonciate'), findsOneWidget);
     expect(find.text('Mitila Linda Harmonie'), findsNothing);
     expect(calls, contains('POST /api-test/public/accounts/login'));
+    expect(calls.where((call) => call.contains('/accounts/')).length, 1);
     expect(calls, contains('GET /api-test/public/famille-membres'));
 
     final galleryButton = find.text('3 anciennes photos').first;
@@ -245,6 +226,35 @@ void main() {
       tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
       ThemeMode.dark,
     );
+  });
+
+  testWidgets('keeps the login form usable on narrow and wide screens', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final apiService = ApiService(
+      client: MockClient(
+        (_) async =>
+            _response(500, {'success': false, 'message': 'Unexpected request'}),
+      ),
+    );
+    addTearDown(apiService.close);
+
+    for (final size in [
+      const Size(320, 640),
+      const Size(768, 900),
+      const Size(1440, 1000),
+    ]) {
+      tester.view.physicalSize = size;
+      await tester.pumpWidget(CvFlutterApp(apiService: apiService));
+      await tester.pumpAndSettle();
+      expect(find.text('Se connecter'), findsOneWidget);
+      expect(find.textContaining('Créer un compte'), findsNothing);
+      expect(tester.takeException(), isNull, reason: 'Viewport $size');
+    }
   });
 }
 

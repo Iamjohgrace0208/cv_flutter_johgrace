@@ -21,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   late final ApiService _api = widget.apiService ?? ApiService();
   bool _obscurePassword = true;
-  bool _isRegistering = false;
   bool _isSubmitting = false;
 
   @override
@@ -38,44 +37,27 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      if (_isRegistering) {
-        await _api.register(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
-        if (!mounted) return;
-        setState(() => _isRegistering = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compte créé. Connectez-vous pour continuer.'),
-          ),
-        );
-      } else {
-        await _api.login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
-        if (!mounted) return;
-        final navigator = Navigator.of(context);
-        navigator.pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (_) => AppShell(
-              apiService: _api,
-              onToggleTheme: widget.onToggleTheme,
-              onLogout: () {
-                navigator.pushReplacement(
-                  MaterialPageRoute<void>(
-                    builder: (_) => LoginPage(
-                      onToggleTheme: widget.onToggleTheme,
-                      apiService: _api,
-                    ),
+      await _api.login(_emailController.text.trim(), _passwordController.text);
+      if (!mounted) return;
+      final navigator = Navigator.of(context);
+      navigator.pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => AppShell(
+            apiService: _api,
+            onToggleTheme: widget.onToggleTheme,
+            onLogout: () {
+              navigator.pushReplacement(
+                MaterialPageRoute<void>(
+                  builder: (_) => LoginPage(
+                    onToggleTheme: widget.onToggleTheme,
+                    apiService: _api,
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
-      }
+        ),
+      );
     } on ApiException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -118,13 +100,17 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(width: 11),
-                      Text(
-                        'J O H G R A C E',
-                        style: TextStyle(
-                          color: scheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.5,
+                      Flexible(
+                        child: Text(
+                          'J O H G R A C E',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: scheme.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -241,9 +227,6 @@ class _LoginPageState extends State<LoginPage> {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez saisir votre mot de passe.';
                             }
-                            if (_isRegistering && value.length < 6) {
-                              return 'Le mot de passe doit contenir au moins 6 caractères.';
-                            }
                             return null;
                           },
                         ),
@@ -274,32 +257,17 @@ class _LoginPageState extends State<LoginPage> {
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  _isRegistering
-                                      ? 'Créer mon compte'
-                                      : 'Se connecter',
+                                const Text(
+                                  'Se connecter',
                                   style: TextStyle(fontWeight: FontWeight.w700),
                                 ),
-                                SizedBox(width: 9),
-                                Icon(Icons.arrow_forward_rounded, size: 19),
+                                const SizedBox(width: 9),
+                                const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 19,
+                                ),
                               ],
                             ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: TextButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => setState(() {
-                              _isRegistering = !_isRegistering;
-                              _formKey.currentState?.reset();
-                            }),
-                      child: Text(
-                        _isRegistering
-                            ? 'J’ai déjà un compte · Se connecter'
-                            : 'Pas encore de compte ? Créer un compte',
-                      ),
                     ),
                   ),
                   const SizedBox(height: 15),

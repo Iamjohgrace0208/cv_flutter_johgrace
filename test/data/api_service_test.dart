@@ -34,14 +34,12 @@ void main() {
       );
       addTearDown(api.close);
 
-      final registration = await api.register('test@example.com', 'secret123');
       final login = await api.login('test@example.com', 'secret123');
       final members = await api.getFamilyMembers();
       await api.createFamilyMember(_validMember());
       await api.updateFamilyMember(42, _validMember());
       await api.deleteFamilyMember(42);
 
-      expect(registration, {'id': 42});
       expect(login, {'id': 42});
       expect(members.single.fullName, 'Papa Bigega Baraka');
       expect(
@@ -52,7 +50,6 @@ void main() {
       expect(
         requests.map((request) => '${request.method} ${request.url.path}'),
         [
-          'POST /api-test/public/accounts/register',
           'POST /api-test/public/accounts/login',
           'GET /api-test/public/famille-membres',
           'POST /api-test/public/famille-membres',
@@ -60,24 +57,15 @@ void main() {
           'DELETE /api-test/public/famille-membres/42',
         ],
       );
-      for (final request in [
-        requests[0],
-        requests[1],
-        requests[3],
-        requests[4],
-      ]) {
+      for (final request in [requests[0], requests[2], requests[3]]) {
         expect(request.headers['content-type'], 'application/json');
       }
       expect(jsonDecode(requests[0].body), {
         'email': 'test@example.com',
         'password': 'secret123',
       });
-      expect(jsonDecode(requests[1].body), {
-        'email': 'test@example.com',
-        'password': 'secret123',
-      });
+      expect(jsonDecode(requests[2].body), _validMember());
       expect(jsonDecode(requests[3].body), _validMember());
-      expect(jsonDecode(requests[4].body), _validMember());
     });
 
     test(
@@ -189,7 +177,7 @@ void main() {
       );
     });
 
-    test('surfaces the documented login and registration errors', () async {
+    test('surfaces login errors', () async {
       final api = ApiService(
         baseUri: Uri.parse('http://localhost/api-test/public'),
         client: MockClient((request) async {
@@ -199,9 +187,9 @@ void main() {
               'message': 'Email ou mot de passe incorrect',
             });
           }
-          return _jsonResponse(409, {
+          return _jsonResponse(404, {
             'success': false,
-            'message': 'Cet email est déjà utilisé',
+            'message': 'Route introuvable',
           });
         }),
       );
@@ -214,16 +202,6 @@ void main() {
             (error) => error.message,
             'message',
             'Email ou mot de passe incorrect',
-          ),
-        ),
-      );
-      await expectLater(
-        api.register('test@example.com', 'secret123'),
-        throwsA(
-          isA<ApiException>().having(
-            (error) => error.message,
-            'message',
-            'Cet email est déjà utilisé',
           ),
         ),
       );
